@@ -1,7 +1,7 @@
-library(mapview)
+library(leaflet)
 
-build_map <- function(data) {leaflet(data) %>%
+build_map <- function(data) {
+  leaflet(data) %>%
     addTiles() %>%
-    addMarkers() %>%
-    addPopups()
+    addMarkers()
 } 

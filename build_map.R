@@ -1,5 +1,4 @@
 library(sf)
-library(mapview)
 library(leaflet)
 
 data <- st_read("C:/Users/Heidi Rodenhizer/Documents/School/NAU/Schuur Lab/Shiny/EML_map/data/EML_Sites.shp")
@@ -10,5 +9,5 @@ data <- st_read("C:/Users/Heidi Rodenhizer/Documents/School/NAU/Schuur Lab/Shiny
 
 leaflet(data) %>%
   addTiles() %>%
-  addMarkers() %>%
-  addPopups()
+  addMarkers() #%>%
+ # addPopups()

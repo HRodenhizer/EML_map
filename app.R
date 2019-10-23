@@ -1,7 +1,7 @@
 ### Loab libraries ###
 library(shiny)
 library(sf)
-library(mapview)
+library(leaflet)
 
 ### Load data ###
 sites <- st_read('data/EML_Sites.shp')
@@ -26,10 +26,16 @@ ui <- fluidPage(
 
 # Server logic ----
 server <- function(input, output) {
-  output$map <- renderPlot({
-    build_map(sites)
+  output$map <- renderLeaflet({
+    leaflet() %>%
+      addTiles() %>%
+      addMarkers(data = sites,
+                 label = sites$Name) %>% 
+      addProviderTiles("Esri.WorldImagery")
   })
+  
 }
+
 
 ### Run app ###
 shinyApp(ui, server)
