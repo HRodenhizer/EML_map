@@ -38,3 +38,7 @@ leaflet(data) %>%
   addTiles() %>%
   addMarkers() #%>%
  # addPopups()
+
+
+# example
+shiny::runGitHub("rstudio/shiny-examples", subdir="063-superzip-example", display.mode = 'showcase')
