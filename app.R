@@ -33,23 +33,27 @@ server <- function(input, output) {
   pal <- colorFactor(palette = c("black", "red", 'yellow'), domain = plots$exp)
   
   output$map <- renderLeaflet({
+    
     sitedata <- switch(
       input$site,
       'Sites' = sites
     )
-    if (input$site) {
-    leaflet() %>%
+    
+    l <- leaflet() %>%
       addTiles() %>%
-      addAwesomeMarkers(data = sitedata,
-                 label = sitedata$Name,
-                 icon = icon.glyphicon) %>%
-      addCircles(data = plots, color = ~pal(plots$exp), radius = 0.5, label = plots$label) %>%
+      addCircles(data = plots,
+                 color = ~pal(plots$exp),
+                 radius = 0.5,
+                 label = plots$label) %>%
       addProviderTiles("Esri.WorldImagery")
+    
+    if (input$site) {
+      l %>% addAwesomeMarkers(data = sitedata,
+                              label = sites$Name,
+                              icon = icon.glyphicon,
+                              group = 'sitegroup')
     } else {
-      leaflet() %>%
-        addTiles() %>%
-        addCircles(data = plots, color = ~pal(plots$exp), radius = 0.5, label = plots$label) %>%
-        addProviderTiles("Esri.WorldImagery")
+      l
     }
   })
   
