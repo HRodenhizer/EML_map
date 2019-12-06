@@ -4,6 +4,7 @@ library(sf)
 library(leaflet)
 
 ### Load data ###
+# need to change to read in one data file that contains all of the necessary data
 sites <- st_read('data/EML_Sites.shp')
 plots <- st_read('data/plot_coords.shp')
 
@@ -11,6 +12,9 @@ plots <- st_read('data/plot_coords.shp')
 source('helpers.R')
 
 ### User interface ###
+# need to add in tabs for map and data visualization
+# need to create pickerInput() options rather than checkboxInput
+# pickerInput() allows the user to select any, none, or all options, while checkboxInput only has one option to turn on or off
 ui <- fluidPage(
   titlePanel("EML Map"),
   
@@ -27,6 +31,8 @@ ui <- fluidPage(
 )
 
 # Server logic ----
+# need to change map update to look more like Gerardo's
+# (creating the background map outside(?) of the reactive expression and using clearMarkers())
 server <- function(input, output) {
   
   icon.glyphicon <- makeAwesomeIcon(icon= 'map-marker-alt', library = 'fa', markerColor = 'lightgray', iconColor = 'black')
