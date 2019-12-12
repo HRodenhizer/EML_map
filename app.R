@@ -1,15 +1,22 @@
-### Loab libraries ###
+### Load libraries ###
 library(shiny)
 library(sf)
 library(leaflet)
+library(shinyWidgets)
 
 ### Load data ###
-# need to change to read in one data file that contains all of the necessary data
-sites <- st_read('data/EML_Sites.shp')
-plots <- st_read('data/plot_coords.shp')
+data <- st_read('data/data.shp')
+
+# find the geographical center of the sites (more or less) to set the view of the map
+center <- data %>%
+  filter(type == 'site' & (site == 'CiPEHR' | site == 'Gradient')) %>%
+  st_coordinates() %>%
+  as.data.frame() %>%
+  summarise(X = mean(X),
+            Y = mean(Y))
 
 ### Source helper functions ###
-source('helpers.R')
+# source('helpers.R')
 
 ### User interface ###
 # need to add in tabs for map and data visualization
@@ -20,8 +27,11 @@ ui <- fluidPage(
   
   sidebarLayout(
     sidebarPanel(
-      checkboxInput("site", label = "Sites", value = TRUE)
-       
+      checkboxGroupInput("type",
+                         label = "Plot Type",
+                         choices = c('Flux Plots' = 'flux', 'Gas Well Plots' = 'gw', 'Water Wells' = 'ww', 'Gradient' = 'grad', 'Sites' = 'site'),
+                         selected = c('site'))
+      
     ),
     
     mainPanel(
@@ -35,32 +45,48 @@ ui <- fluidPage(
 # (creating the background map outside(?) of the reactive expression and using clearMarkers())
 server <- function(input, output) {
   
-  icon.glyphicon <- makeAwesomeIcon(icon= 'map-marker-alt', library = 'fa', markerColor = 'lightgray', iconColor = 'black')
-  pal <- colorFactor(palette = c("black", "red", 'yellow'), domain = plots$exp)
+  # select correct data
+  plot_data <- reactive({
+    
+    data <- data %>%
+      filter(type %in% input$type) %>%
+      mutate(radius = ifelse(type == 'site',
+                             10,
+                             5))
+    
+    # Conditional so that app does not crash with empty data.frame
+    if(nrow(data) == 0)
+      return()
+    else
+      return(data)
+    
+    })
+  
+  # icon.glyphicon <- makeAwesomeIcon(icon= 'map-marker-alt', library = 'fa', markerColor = 'lightgray', iconColor = 'black')
+  pal <- colorFactor(palette = c("yellow", "red", 'green', 'black', 'blue'), domain = unique(data$type))
   
   output$map <- renderLeaflet({
     
-    sitedata <- switch(
-      input$site,
-      'Sites' = sites
-    )
-    
-    l <- leaflet() %>%
+    leaflet() %>%
+      setView(center[1, 1], center[1, 2], zoom = 14) %>%
       addTiles() %>%
-      addCircles(data = plots,
-                 color = ~pal(plots$exp),
-                 radius = 0.5,
-                 label = plots$label) %>%
       addProviderTiles("Esri.WorldImagery")
     
-    if (input$site) {
-      l %>% addAwesomeMarkers(data = sitedata,
-                              label = sites$Name,
-                              icon = icon.glyphicon,
-                              group = 'sitegroup')
-    } else {
-      l
-    }
+  })
+  
+  observe({
+
+    if (is.null(plot_data())) return(leafletProxy("map") %>%
+                                           clearMarkers())
+    leafletProxy("map") %>%
+      clearMarkers() %>%
+      addCircleMarkers(data = plot_data(),
+                       lng = ~st_coordinates(plot_data())[,1],
+                       lat = ~st_coordinates(plot_data())[,2],
+                       color = '#000000',
+                       fillColor = ~pal(plot_data()$type),
+                       radius = ~plot_data()$radius,
+                       weight = 2)
   })
   
 }

@@ -71,8 +71,9 @@ plots_format <- plots %>%
                                                                'Drying & Soil Warming')))))),
 label = ifelse(site == 'Gradient',
                paste(site, '/n', 'Plot: ', plot),
-                        paste(site, Type, '/n', 'Fence: ', fence, ', Plot: ', plot))) %>%
-  select(site, type = Type, block, fence, plot, treatment, label)
+                        paste(site, Type, '/n', 'Fence: ', fence, ', Plot: ', plot)),
+type = as.character(Type)) %>%
+  select(site, type, block, fence, plot, treatment, label)
 
 # 2017 water wells
 ww_format <- ww %>%
@@ -105,33 +106,12 @@ sites_format <- sites %>%
          label = ifelse(Exp == 'Gradient',
                         paste(Exp, Block, sep = ' '),
                         paste(Exp, 'Block ', Block)),
-         type = NA) %>%
-  select(site = Exp, type, block = Block, fence, plot, label)
+         type = 'site',
+         treatment = NA) %>%
+  select(site = Exp, type, block = Block, fence, plot, treatment, label)
 
 data <- plots_format %>%
-  rbind.data.frame(ww_format, sites_format) %>%
-  mutate(treatment = ifelse(site == 'CiPEHR' & type != 'ww',
-                            ifelse(as.numeric(plot) <= 4 & is.even(as.numeric(plot)),
-                                   'Control',
-                                   ifelse(as.numeric(plot) <= 4 & is.odd(as.numeric(plot)),
-                                          'Air Warming',
-                                          ifelse(as.numeric(plot) >= 5 & is.even(as.numeric(plot)),
-                                                 'Soil Warming',
-                                                 'Air & Soil Warming'))),
-                            ifelse(site == 'DryPEHR' & type != 'ww',
-                                   ifelse(plot == 'a',
-                                          'Control',
-                                          ifelse(plot == 'b',
-                                                 'Drying',
-                                                 ifelse(plot == 'c',
-                                                        'Warming',
-                                                        'Drying & Warming'))),
-                                   ifelse(site == 'Gradient',
-                                          ifelse(as.numeric(plot) <= 12,
-                                                 'Extensive',
-                                                 ifelse(as.numeric(plot) <= 24,
-                                                        'Moderate',
-                                                        'Minimal'))))))
+  rbind.data.frame(ww_format, sites_format)
   
 # st_write(data, 'C:/Users/Heidi Rodenhizer/Documents/School/NAU/Schuur Lab/Shiny/EML_map/data/data.shp')
 
