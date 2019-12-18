@@ -3,6 +3,7 @@ library(shiny)
 library(sf)
 library(leaflet)
 library(shinyWidgets)
+library(tidyverse)
 
 ### Load data ###
 data <- st_read('data/data.shp')
@@ -35,10 +36,14 @@ ui <- fluidPage(
     ),
     
     mainPanel(
-      leafletOutput("map")
+      tabsetPanel(type = 'tabs',
+                  tabPanel('Map', leafletOutput("map")),
+                  tabPanel('Data', p('Summary graphs of the data will be shown here.'))
+                  )
     )
   )
 )
+
 
 # Server logic ----
 # need to change map update to look more like Gerardo's
